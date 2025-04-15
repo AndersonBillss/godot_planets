@@ -1,7 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://cm37g7h33cqrl"]
+[gd_scene load_steps=4 format=3 uid="uid://cm37g7h33cqrl"]
 
 [ext_resource type="PackedScene" uid="uid://bia2a7qysdlvw" path="res://scenes/planet.tscn" id="1_o5qli"]
 [ext_resource type="Script" uid="uid://bxw13qsgoyx1n" path="res://scripts/Camera.cs" id="2_0wfyh"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_0wfyh"]
+radius = 2.0
+height = 4.0
 
 [node name="main" type="Node3D"]
 
@@ -9,6 +13,9 @@
 transform = Transform3D(0.799831, 0.369775, -0.472796, 0, 0.787699, 0.61606, 0.600225, -0.492744, 0.630026, -5, 2, 2)
 
 [node name="Planet" parent="." instance=ExtResource("1_o5qli")]
+mesh = SubResource("SphereMesh_0wfyh")
 
 [node name="Camera3D" type="Camera3D" parent="Planet"]
+transform = Transform3D(0.61837, 0, 0.785888, 0, 1, 0, -0.785888, 0, 0.61837, 4.71532, 0, 3.71022)
 script = ExtResource("2_0wfyh")
+distance = 6.0

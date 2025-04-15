@@ -1,19 +1,25 @@
 using Godot;
-using System;
 
+[Tool]
 public partial class Planet : MeshInstance3D
 {
-	[Export] public float Size = 1f;
+	[Export] public float Radius = 1f;
+	private float _previousRadius = -1f;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
-		Mesh = _GenerateSphere(Size);
+		if (Engine.IsEditorHint()) {
+			_GeneratePreview(Radius);
+		} else {
+			_GenerateSphere(Radius);
+		}
 	}
 
-	private ArrayMesh _GenerateSphere(float size){
+	private void _GenerateSphere(float size){
 		SurfaceTool st = new();
 		st.Begin(Mesh.PrimitiveType.Triangles);
 
-		float h = size * .5f;
+		float h = size;
 		Vector3[] vertices = [
 			new(-h, -h,  h), new( h, -h,  h), new( h,  h,  h), new(-h,  h,  h), // Front
 			new( h, -h, -h), new(-h, -h, -h), new(-h,  h, -h), new( h,  h, -h), // Back
@@ -52,10 +58,23 @@ public partial class Planet : MeshInstance3D
 
 		ArrayMesh mesh = new();
 		st.Commit(mesh);
-		return mesh;
+		Mesh = mesh;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta) {
+		if(Engine.IsEditorHint() && (_previousRadius != Radius)) {
+			_ProcessDebug(delta);
+			return;
+		}
+	}
+
+	void _ProcessDebug(double delta) {
+		_previousRadius = Radius;
+		_GeneratePreview(Radius);    
+	}
+
+	private void _GeneratePreview(float radius) {
+		Mesh = new SphereMesh() { Height = radius * 2, Radius = radius };
 	}
 }
