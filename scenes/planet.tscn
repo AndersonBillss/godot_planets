@@ -1,6 +1,8 @@
 [gd_scene load_steps=2 format=3 uid="uid://bia2a7qysdlvw"]
 
-[ext_resource type="Script" path="res://scripts/Planet.cs" id="1_dv2li"]
+[ext_resource type="Script" uid="uid://b6x8qc45ixrg4" path="res://scripts/Planet.cs" id="1_dv2li"]
 
 [node name="Planet" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 script = ExtResource("1_dv2li")
