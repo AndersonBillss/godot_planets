@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Godot;
 
 [Tool]
@@ -15,39 +17,43 @@ public partial class Planet : MeshInstance3D
 		}
 	}
 
+	float longitudeLines = 50;
+	float lattitudeLines = 30;
 	private void _GenerateSphere(float size){
 		SurfaceTool st = new();
 		st.Begin(Mesh.PrimitiveType.Triangles);
+        List<Vector3> vertices = [];
+        List<Vector3> normals = [];
+		List<int> indices = [];
 
-		float h = size;
-		Vector3[] vertices = [
-			new(-h, -h,  h), new( h, -h,  h), new( h,  h,  h), new(-h,  h,  h), // Front
-			new( h, -h, -h), new(-h, -h, -h), new(-h,  h, -h), new( h,  h, -h), // Back
-			new(-h, -h, -h), new(-h, -h,  h), new(-h,  h,  h), new(-h,  h, -h), // Left
-			new( h, -h,  h), new( h, -h, -h), new( h,  h, -h), new( h,  h,  h), // Right
-			new(-h,  h,  h), new( h,  h,  h), new( h,  h, -h), new(-h,  h, -h), // Top
-			new(-h, -h, -h), new( h, -h, -h), new( h, -h,  h), new(-h, -h,  h)  // Bottom
-		];
+        // Loop over lattitude and longitude lines
+        for(int i=0; i<longitudeLines; i++){
+            for(int j=0; j<lattitudeLines; j++){
+				Vector3 a = GetSphereCoords(i, j);
+				Vector3 b = GetSphereCoords((int)((i+1)%longitudeLines), j);
+				Vector3 c = GetSphereCoords(i, (int)((j+1)%lattitudeLines));
+				vertices.Add(a);
+				vertices.Add(b);
+				vertices.Add(c);
+				Vector3 normal = GetOrientedTriangleNormal(a, b, c, new Vector3(0,0,0));
+				normals.Add(normal);
+				normals.Add(normal);
+				normals.Add(normal);
 
-		Vector3[] normals = [
-			Vector3.Forward, Vector3.Forward, Vector3.Forward, Vector3.Forward,
-			Vector3.Back, Vector3.Back, Vector3.Back, Vector3.Back,
-			Vector3.Left, Vector3.Left, Vector3.Left, Vector3.Left,
-			Vector3.Right, Vector3.Right, Vector3.Right, Vector3.Right,
-			Vector3.Up, Vector3.Up, Vector3.Up, Vector3.Up,
-			Vector3.Down, Vector3.Down, Vector3.Down, Vector3.Down
-		];
+				Vector3 d = GetSphereCoords((int)((i+1)%longitudeLines), (int)((j+1)%lattitudeLines));
+				vertices.Add(b);
+				vertices.Add(d);
+				vertices.Add(c);
+				normals.Add(normal);
+				normals.Add(normal);
+				normals.Add(normal);
+            }
+        }
+		for(int i=0; i<vertices.Count; i++){
+			indices.Add(i);
+		}
 
-		int[] indices = [
-			0, 2, 1, 0, 3, 2,
-			4, 6, 5, 4, 7, 6,
-			8, 10, 9, 8, 11, 10,
-			12, 14, 13, 12, 15, 14,
-			16, 18, 17, 16, 19, 18,
-			20, 22, 21, 20, 23, 22
-		];
-
-		for (int i = 0; i < vertices.Length; i++) {
+		for (int i = 0; i < vertices.Count; i++) {
 			st.SetNormal(normals[i]);
 			st.AddVertex(vertices[i]);
 		}
@@ -60,6 +66,38 @@ public partial class Planet : MeshInstance3D
 		st.Commit(mesh);
 		Mesh = mesh;
 	}
+
+	private Vector3 GetSphereCoords(int i, int j){
+		float pitch = i * (2*(float)Math.PI / longitudeLines);
+		float yaw = j * (2*(float)Math.PI / lattitudeLines);
+		float cosPitch = (float)Math.Cos(pitch);
+		
+		float posX = Radius * (float)Math.Cos(yaw) * cosPitch;
+		float posY = Radius * (float)Math.Sin(pitch);
+		float posZ = Radius * (float)Math.Sin(yaw) * cosPitch;
+
+		return new Vector3(posX, posY, posZ);
+	}
+
+	public static Vector3 GetOrientedTriangleNormal(Vector3 a, Vector3 b, Vector3 c, Vector3 shapeCenter)
+    {
+        // Compute the normal using the cross product of two triangle edges
+        Vector3 edge1 = b - a;
+        Vector3 edge2 = c - a;
+        Vector3 normal = edge1.Cross(edge2).Normalized();
+
+        // Ensure the normal is facing away from the shape center
+        Vector3 triangleCenter = (a + b + c) / 3.0f;
+        Vector3 toCenter = shapeCenter - triangleCenter;
+
+        // If the normal is pointing towards the shape center, flip it
+        if (normal.Dot(toCenter) > 0)
+        {
+            normal = -normal;
+        }
+
+        return normal;
+    }
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta) {
