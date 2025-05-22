@@ -17,7 +17,7 @@ public partial class Planet : MeshInstance3D {
 		}
 	}
 
-	int cubeSections = 10;
+	int cubeSections = 15;
 	private void _GenerateSphere(float radius) {
 		List<Vector3> vertices = [];
 		List<Vector3> normals = [];

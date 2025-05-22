@@ -19,4 +19,3 @@ Radius = 3.5
 [node name="Camera3D" type="Camera3D" parent="Planet"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 8, 0, 0)
 script = ExtResource("2_0wfyh")
-distance = 8.0
