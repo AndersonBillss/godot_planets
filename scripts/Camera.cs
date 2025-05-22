@@ -3,7 +3,7 @@ using System;
 
 [Tool]
 public partial class Camera : Camera3D {
-	[Export] float lookSpeed = 2f;
+	[Export] float lookSpeed = 1f;
 	[Export] float scrollSpeed = .05f;
 
 	public float yaw = 0f;
@@ -37,6 +37,9 @@ public partial class Camera : Camera3D {
 	private float GetScrollDistace() {
 		return scrollSpeed * (distance - minDistance);
 	}
+	private float GetRotateDistace() {
+		return (float)Math.Sqrt(distance - minDistance);
+	}
 
 	public override void _Process(double delta) {
 		// If in editor, use custom debug process
@@ -49,17 +52,17 @@ public partial class Camera : Camera3D {
 		float dt = (float)delta;
 
 		if (Input.IsKeyPressed(Key.Left) || Input.IsKeyPressed(Key.A)) {
-			yaw += lookSpeed * dt;
+			yaw += lookSpeed * GetRotateDistace() * dt;
 		}
 		if (Input.IsKeyPressed(Key.Right) || Input.IsKeyPressed(Key.D)) {
-			yaw -= lookSpeed * dt;
+			yaw -= lookSpeed * GetRotateDistace() * dt;
 		}
 		if (Input.IsKeyPressed(Key.Up) || Input.IsKeyPressed(Key.W)) {
-			pitch += lookSpeed * dt;
+			pitch += lookSpeed * GetRotateDistace() * dt;
 			if (pitch > Math.PI / 2) pitch = (float)Math.PI / 2;
 		}
 		if (Input.IsKeyPressed(Key.Down) || Input.IsKeyPressed(Key.S)) {
-			pitch -= lookSpeed * dt;
+			pitch -= lookSpeed * GetRotateDistace() * dt;
 			if (pitch < -Math.PI / 2) pitch = -(float)Math.PI / 2;
 		}
 		_UpdatePosition();
