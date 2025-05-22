@@ -26,18 +26,7 @@ public partial class Planet : MeshInstance3D {
 		List<Vector3> normals = [];
 		List<int> indices = [];
 
-		ConstructTop(normals, vertices);
-		ConstructRight(normals, vertices);
-		ConstructFront(normals, vertices);
-
-		ConstructBottom(normals, vertices);
-		ConstructLeft(normals, vertices);
-		ConstructBack(normals, vertices);
-
-
-		for (int i = 0; i < vertices.Count; i++) {
-			indices.Add(i);
-		}
+		ConstructSphereCube(normals, vertices, indices);
 
 		for (int i = 0; i < vertices.Count; i++) {
 			st.SetNormal(normals[i]);
@@ -53,6 +42,19 @@ public partial class Planet : MeshInstance3D {
 		Mesh = mesh;
 	}
 
+	private void ConstructSphereCube(List<Vector3> normals, List<Vector3> vertices, List<int> indices) {
+		ConstructTop(normals, vertices);
+		ConstructRight(normals, vertices);
+		ConstructFront(normals, vertices);
+
+		ConstructBottom(normals, vertices);
+		ConstructLeft(normals, vertices);
+		ConstructBack(normals, vertices);
+
+		for (int i = 0; i < vertices.Count; i++) {
+			indices.Add(i);
+		}
+	}
 	private void ConstructBottom(List<Vector3> normals, List<Vector3> vertices) {
 		for (int x = 0; x < cubeSections; x++) {
 			for (int z = 0; z < cubeSections; z++) {
@@ -134,28 +136,24 @@ public partial class Planet : MeshInstance3D {
 
 	private void AddSquareTriangles(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4, List<Vector3> normals, List<Vector3> vertices) {
 		Vector3 shift = new(.5f, .5f, .5f);
-		Vector3 adjustedPoint1 = (point1 / cubeSections) - shift;
-		Vector3 adjustedPoint2 = (point2 / cubeSections) - shift;
-		Vector3 adjustedPoint3 = (point3 / cubeSections) - shift;
-		Vector3 adjustedPoint4 = (point4 / cubeSections) - shift;
+		Vector3 adjustedPoint1 = GetCubeSphereCoords((point1 / cubeSections) - shift, new Vector3(0, 0, 0));
+		Vector3 adjustedPoint2 = GetCubeSphereCoords((point2 / cubeSections) - shift, new Vector3(0, 0, 0));
+		Vector3 adjustedPoint3 = GetCubeSphereCoords((point3 / cubeSections) - shift, new Vector3(0, 0, 0));
+		Vector3 adjustedPoint4 = GetCubeSphereCoords((point4 / cubeSections) - shift, new Vector3(0, 0, 0));
 
 		vertices.Add(adjustedPoint1);
 		vertices.Add(adjustedPoint2);
 		vertices.Add(adjustedPoint3);
 		normals.Add(adjustedPoint1);
-		normals.Add(adjustedPoint1);
-		normals.Add(adjustedPoint1);
-		// normals.Add(adjustedPoint2);
-		// normals.Add(adjustedPoint3);
+		normals.Add(adjustedPoint2);
+		normals.Add(adjustedPoint3);
 
 		vertices.Add(adjustedPoint2);
 		vertices.Add(adjustedPoint4);
 		vertices.Add(adjustedPoint3);
 		normals.Add(adjustedPoint2);
-		normals.Add(adjustedPoint2);
-		normals.Add(adjustedPoint2);
-		// normals.Add(adjustedPoint4);
-		// normals.Add(adjustedPoint3);
+		normals.Add(adjustedPoint4);
+		normals.Add(adjustedPoint3);
 	}
 
 	private Vector3 GetCubeSphereCoords(Vector3 pointPosition, Vector3 shapeCenter) {
