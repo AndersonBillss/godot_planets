@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 
@@ -118,7 +119,16 @@ namespace godot_planets.scripts {
         }
 
         private static Vector3 GetCubeSphereCoords(Vector3 pointPosition, Vector3 shapeCenter, float radius) {
-            Vector3 toCenter = pointPosition - shapeCenter;
+            Vector3 v = pointPosition * 2f;
+            float x2 = v.X * v.X;
+            float y2 = v.Y * v.Y;
+            float z2 = v.Z * v.Z;
+            Vector3 newPointPosition = new(
+                v.X * (float)Mathf.Sqrt(1f - y2 / 2f - z2 / 2f + y2 * z2 / 3f),
+                v.Y * (float)Mathf.Sqrt(1f - x2 / 2f - z2 / 2f + x2 * z2 / 3f),
+                v.Z * (float)Mathf.Sqrt(1f - x2 / 2f - y2 / 2f + x2 * y2 / 3f)
+            );
+            Vector3 toCenter = newPointPosition - shapeCenter;
             return shapeCenter + toCenter.Normalized() * radius;
         }
 

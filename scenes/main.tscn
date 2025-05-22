@@ -4,8 +4,8 @@
 [ext_resource type="Script" uid="uid://bxw13qsgoyx1n" path="res://scripts/Camera.cs" id="2_0wfyh"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_0wfyh"]
-radius = 2.0
-height = 4.0
+radius = 3.5
+height = 7.0
 
 [node name="main" type="Node3D"]
 
@@ -14,6 +14,7 @@ transform = Transform3D(0.799831, 0.369775, -0.472796, 0, 0.787699, 0.61606, 0.6
 
 [node name="Planet" parent="." instance=ExtResource("1_o5qli")]
 mesh = SubResource("SphereMesh_0wfyh")
+Radius = 3.5
 
 [node name="Camera3D" type="Camera3D" parent="Planet"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 8, 0, 0)

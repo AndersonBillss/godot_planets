@@ -17,13 +17,13 @@ public partial class Planet : MeshInstance3D {
 		}
 	}
 
-	int cubeSections = 3;
-	private void _GenerateSphere(float size) {
+	int cubeSections = 10;
+	private void _GenerateSphere(float radius) {
 		List<Vector3> vertices = [];
 		List<Vector3> normals = [];
 		List<int> indices = [];
 
-		ConstructSphereCube(normals, vertices, indices, cubeSections, Radius);
+		ConstructSphereCube(normals, vertices, indices, cubeSections, radius);
 		ArrayMesh mesh = new();
 
         CreateMesh(normals, vertices, indices, mesh);
