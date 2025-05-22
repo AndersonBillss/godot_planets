@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Godot;
 
 [Tool]
-public partial class Planet : MeshInstance3D
-{
+public partial class Planet : MeshInstance3D {
 	[Export] public float Radius = 1f;
 	private float _previousRadius = -1f;
 
@@ -12,44 +12,30 @@ public partial class Planet : MeshInstance3D
 	public override void _Ready() {
 		if (Engine.IsEditorHint()) {
 			_GeneratePreview(Radius);
-		} else {
+		}
+		else {
 			_GenerateSphere(Radius);
 		}
 	}
 
-	float longitudeLines = 50;
-	float lattitudeLines = 30;
-	private void _GenerateSphere(float size){
+	int cubeSections = 3;
+	private void _GenerateSphere(float size) {
 		SurfaceTool st = new();
 		st.Begin(Mesh.PrimitiveType.Triangles);
-        List<Vector3> vertices = [];
-        List<Vector3> normals = [];
+		List<Vector3> vertices = [];
+		List<Vector3> normals = [];
 		List<int> indices = [];
 
-        // Loop over lattitude and longitude lines
-        for(int i=0; i<longitudeLines; i++){
-            for(int j=0; j<lattitudeLines; j++){
-				Vector3 a = GetSphereCoords(i, j);
-				Vector3 b = GetSphereCoords((int)((i+1)%longitudeLines), j);
-				Vector3 c = GetSphereCoords(i, (int)((j+1)%lattitudeLines));
-				vertices.Add(a);
-				vertices.Add(b);
-				vertices.Add(c);
-				Vector3 normal = GetOrientedTriangleNormal(a, b, c, new Vector3(0,0,0));
-				normals.Add(normal);
-				normals.Add(normal);
-				normals.Add(normal);
+		ConstructTop(normals, vertices);
+		ConstructRight(normals, vertices);
+		ConstructFront(normals, vertices);
 
-				Vector3 d = GetSphereCoords((int)((i+1)%longitudeLines), (int)((j+1)%lattitudeLines));
-				vertices.Add(b);
-				vertices.Add(d);
-				vertices.Add(c);
-				normals.Add(normal);
-				normals.Add(normal);
-				normals.Add(normal);
-            }
-        }
-		for(int i=0; i<vertices.Count; i++){
+		ConstructBottom(normals, vertices);
+		ConstructLeft(normals, vertices);
+		ConstructBack(normals, vertices);
+
+
+		for (int i = 0; i < vertices.Count; i++) {
 			indices.Add(i);
 		}
 
@@ -67,41 +53,137 @@ public partial class Planet : MeshInstance3D
 		Mesh = mesh;
 	}
 
-	private Vector3 GetSphereCoords(int i, int j){
-		float pitch = i * (2*(float)Math.PI / longitudeLines);
-		float yaw = j * (2*(float)Math.PI / lattitudeLines);
-		float cosPitch = (float)Math.Cos(pitch);
-		
-		float posX = Radius * (float)Math.Cos(yaw) * cosPitch;
-		float posY = Radius * (float)Math.Sin(pitch);
-		float posZ = Radius * (float)Math.Sin(yaw) * cosPitch;
+	private void ConstructBottom(List<Vector3> normals, List<Vector3> vertices) {
+		for (int x = 0; x < cubeSections; x++) {
+			for (int z = 0; z < cubeSections; z++) {
+				int y = 0;
+				Vector3 point1 = new(x, y, z);
+				Vector3 point2 = new(x + 1, y, z);
+				Vector3 point3 = new(x, y, z + 1);
+				Vector3 point4 = new(x + 1, y, z + 1);
 
-		return new Vector3(posX, posY, posZ);
+				AddSquareTriangles(point3, point4, point1, point2, normals, vertices);
+			}
+		}
+	}
+	private void ConstructTop(List<Vector3> normals, List<Vector3> vertices) {
+		for (int x = 0; x < cubeSections; x++) {
+			for (int z = 0; z < cubeSections; z++) {
+				int y = 0;
+				Vector3 point1 = new(x, y + cubeSections, z);
+				Vector3 point2 = new(x + 1, y + cubeSections, z);
+				Vector3 point3 = new(x, y + cubeSections, z + 1);
+				Vector3 point4 = new(x + 1, y + cubeSections, z + 1);
+
+				AddSquareTriangles(point1, point2, point3, point4, normals, vertices);
+			}
+		}
+	}
+	private void ConstructLeft(List<Vector3> normals, List<Vector3> vertices) {
+		for (int x = 0; x < cubeSections; x++) {
+			for (int y = 0; y < cubeSections; y++) {
+				int z = 0;
+				Vector3 point1 = new(x, y, z + cubeSections);
+				Vector3 point2 = new(x + 1, y, z + cubeSections);
+				Vector3 point3 = new(x, y + 1, z + cubeSections);
+				Vector3 point4 = new(x + 1, y + 1, z + cubeSections);
+
+				AddSquareTriangles(point3, point4, point1, point2, normals, vertices);
+			}
+		}
+	}
+	private void ConstructRight(List<Vector3> normals, List<Vector3> vertices) {
+		for (int x = 0; x < cubeSections; x++) {
+			for (int y = 0; y < cubeSections; y++) {
+				int z = 0;
+				Vector3 point1 = new(x, y, z);
+				Vector3 point2 = new(x + 1, y, z);
+				Vector3 point3 = new(x, y + 1, z);
+				Vector3 point4 = new(x + 1, y + 1, z);
+
+				AddSquareTriangles(point1, point2, point3, point4, normals, vertices);
+			}
+		}
+	}
+	private void ConstructFront(List<Vector3> normals, List<Vector3> vertices) {
+		for (int y = 0; y < cubeSections; y++) {
+			for (int z = 0; z < cubeSections; z++) {
+				int x = 0;
+				Vector3 point1 = new(x + cubeSections, y, z);
+				Vector3 point2 = new(x + cubeSections, y + 1, z);
+				Vector3 point3 = new(x + cubeSections, y, z + 1);
+				Vector3 point4 = new(x + cubeSections, y + 1, z + 1);
+
+				AddSquareTriangles(point3, point4, point1, point2, normals, vertices);
+			}
+		}
+	}
+	private void ConstructBack(List<Vector3> normals, List<Vector3> vertices) {
+		for (int y = 0; y < cubeSections; y++) {
+			for (int z = 0; z < cubeSections; z++) {
+				int x = 0;
+				Vector3 point1 = new(x, y, z);
+				Vector3 point2 = new(x, y + 1, z);
+				Vector3 point3 = new(x, y, z + 1);
+				Vector3 point4 = new(x, y + 1, z + 1);
+
+				AddSquareTriangles(point1, point2, point3, point4, normals, vertices);
+			}
+		}
 	}
 
-	public static Vector3 GetOrientedTriangleNormal(Vector3 a, Vector3 b, Vector3 c, Vector3 shapeCenter)
-    {
-        // Compute the normal using the cross product of two triangle edges
-        Vector3 edge1 = b - a;
-        Vector3 edge2 = c - a;
-        Vector3 normal = edge1.Cross(edge2).Normalized();
+	private void AddSquareTriangles(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4, List<Vector3> normals, List<Vector3> vertices) {
+		Vector3 shift = new(.5f, .5f, .5f);
+		Vector3 adjustedPoint1 = (point1 / cubeSections) - shift;
+		Vector3 adjustedPoint2 = (point2 / cubeSections) - shift;
+		Vector3 adjustedPoint3 = (point3 / cubeSections) - shift;
+		Vector3 adjustedPoint4 = (point4 / cubeSections) - shift;
 
-        // Ensure the normal is facing away from the shape center
-        Vector3 triangleCenter = (a + b + c) / 3.0f;
-        Vector3 toCenter = shapeCenter - triangleCenter;
+		vertices.Add(adjustedPoint1);
+		vertices.Add(adjustedPoint2);
+		vertices.Add(adjustedPoint3);
+		normals.Add(adjustedPoint1);
+		normals.Add(adjustedPoint1);
+		normals.Add(adjustedPoint1);
+		// normals.Add(adjustedPoint2);
+		// normals.Add(adjustedPoint3);
 
-        // If the normal is pointing towards the shape center, flip it
-        if (normal.Dot(toCenter) > 0)
-        {
-            normal = -normal;
-        }
+		vertices.Add(adjustedPoint2);
+		vertices.Add(adjustedPoint4);
+		vertices.Add(adjustedPoint3);
+		normals.Add(adjustedPoint2);
+		normals.Add(adjustedPoint2);
+		normals.Add(adjustedPoint2);
+		// normals.Add(adjustedPoint4);
+		// normals.Add(adjustedPoint3);
+	}
 
-        return normal;
-    }
+	private Vector3 GetCubeSphereCoords(Vector3 pointPosition, Vector3 shapeCenter) {
+		Vector3 toCenter = pointPosition - shapeCenter;
+		return shapeCenter + toCenter.Normalized() * Radius;
+	}
+
+	public static Vector3 GetOrientedTriangleNormal(Vector3 a, Vector3 b, Vector3 c, Vector3 shapeCenter) {
+		// Compute the normal using the cross product of two triangle edges
+		Vector3 edge1 = b - a;
+		Vector3 edge2 = c - a;
+		Vector3 normal = edge1.Cross(edge2).Normalized();
+
+		// Ensure the normal is facing away from the shape center
+		Vector3 triangleCenter = (a + b + c) / 3.0f;
+		Vector3 toCenter = shapeCenter - triangleCenter;
+
+		// If the normal is pointing towards the shape center, flip it
+		if (normal.Dot(toCenter) > 0) {
+			normal = -normal;
+		}
+
+		return normal;
+	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta) {
-		if(Engine.IsEditorHint() && (_previousRadius != Radius)) {
+		if (Engine.IsEditorHint() && (_previousRadius != Radius)) {
 			_ProcessDebug(delta);
 			return;
 		}
@@ -109,7 +191,7 @@ public partial class Planet : MeshInstance3D
 
 	void _ProcessDebug(double delta) {
 		_previousRadius = Radius;
-		_GeneratePreview(Radius);    
+		_GeneratePreview(Radius);
 	}
 
 	private void _GeneratePreview(float radius) {

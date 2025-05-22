@@ -14,36 +14,36 @@ public partial class Camera : Camera3D {
 		_UpdatePosition();
 	}
 
-	public override void _Process(double delta){
+	public override void _Process(double delta) {
 		// If in editor, use custom debug process
-		if (Engine.IsEditorHint()){
+		if (Engine.IsEditorHint()) {
 			_ProcessDebug(delta);
 			return;
-		};
+		}
 
 		base._Process(delta);
 		float dt = (float)delta;
 
-		if(Input.IsKeyPressed(Key.Left)){
+		if (Input.IsKeyPressed(Key.Left)) {
 			yaw += speed * dt;
 		}
-		if(Input.IsKeyPressed(Key.Right)){
+		if (Input.IsKeyPressed(Key.Right)) {
 			yaw -= speed * dt;
 		}
-		if(Input.IsKeyPressed(Key.Up)){
+		if (Input.IsKeyPressed(Key.Up)) {
 			pitch += speed * dt;
-			if(pitch > Math.PI/2) pitch = (float)Math.PI/2;
+			if (pitch > Math.PI / 2) pitch = (float)Math.PI / 2;
 		}
-		if(Input.IsKeyPressed(Key.Down)){
+		if (Input.IsKeyPressed(Key.Down)) {
 			pitch -= speed * dt;
-			if(pitch < -Math.PI/2) pitch = -(float)Math.PI/2;
+			if (pitch < -Math.PI / 2) pitch = -(float)Math.PI / 2;
 		}
 		_UpdatePosition();
 	}
 
 	private float _prevDistance = -1f;
-	void _ProcessDebug(double delta){
-		if(_prevDistance != distance) _UpdatePosition();
+	void _ProcessDebug(double delta) {
+		if (_prevDistance != distance) _UpdatePosition();
 		_prevDistance = distance;
 	}
 
@@ -54,6 +54,6 @@ public partial class Camera : Camera3D {
 		float posY = distance * (float)Math.Sin(pitch);
 		float posZ = distance * (float)Math.Sin(yaw) * cosPitch;
 		Position = new(posX, posY, posZ);
-		Rotation = new(-pitch, -yaw + (float)Math.PI/2, 0);
+		Rotation = new(-pitch, -yaw + (float)Math.PI / 2, 0);
 	}
 }
