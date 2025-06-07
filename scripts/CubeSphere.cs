@@ -119,6 +119,8 @@ namespace godot_planets.scripts {
         }
 
         private static Vector3 GetCubeSphereCoords(Vector3 pointPosition, Vector3 shapeCenter, float radius) {
+            // PointPosition itself would create a regular cubeSphere
+            // This algorithm I found spreads the point out more evenly
             Vector3 v = pointPosition * 2f;
             float x2 = v.X * v.X;
             float y2 = v.Y * v.Y;
